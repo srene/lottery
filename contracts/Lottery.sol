@@ -26,6 +26,8 @@ contract Lottery is Ownable {
     mapping(address => uint256) public prize;
 
 
+    /// @dev List of bet slots
+    address[] _slots;
 
     // @notice Passes when the lottery is at closed state
     modifier whenBetsClosed() {
@@ -68,6 +70,70 @@ contract Lottery is Ownable {
         );
         betsClosingTime = closingTime;
         betsOpen = true;
+    }
+
+    /// @notice Gives tokens based on the amount of ETH sent
+    /// @dev This implementation is prone to rounding problems
+    function purchaseTokens() external payable {
+        paymentToken.mint(msg.sender, msg.value * purchaseRatio);
+    }
+
+        /// @notice Charges the bet price and creates a new bet slot with the sender's address
+    function bet() public whenBetsOpen {
+        ownerPool += betFee;
+        prizePool += betPrice;
+        _slots.push(msg.sender);
+        paymentToken.transferFrom(msg.sender, address(this), betPrice +  betFee);
+    }
+
+    /// @notice Calls the bet function `times` times
+    function betMany(uint256 times) external {
+        require(times > 0);
+        while (times > 0) {
+            bet();
+            times--;
+        }
+    }
+
+    /// @notice Closes the lottery and calculates the prize, if any
+    /// @dev Anyone can call this function at any time after the closing time
+    function closeLottery() external {
+        require(block.timestamp >= betsClosingTime, "Too soon to close");
+        require(betsOpen, "Already closed");
+        if (_slots.length > 0) {
+            uint256 winnerIndex = getRandomNumber() % _slots.length;
+            address winner = _slots[winnerIndex];
+            prize[winner] += prizePool;
+            prizePool = 0;
+            delete (_slots);
+        }
+        betsOpen = false;
+    }
+
+    /// @notice Returns a random number calculated from the previous block randao
+    /// @dev This only works after The Merge
+    function getRandomNumber() public view returns (uint256 randomNumber) {
+        randomNumber = block.prevrandao;    
+    }
+
+    /// @notice Withdraws `amount` from that accounts's prize pool
+    function prizeWithdraw(uint256 amount) external {
+        require(amount <= prize[msg.sender], "Not enough prize");
+        prize[msg.sender] -= amount;
+        paymentToken.transfer(msg.sender, amount);
+    }
+
+    /// @notice Withdraws `amount` from the owner's pool
+    function ownerWithdraw(uint256 amount) external onlyOwner {
+        require(amount <= ownerPool, "Not enough fees collected");
+        ownerPool -= amount;
+        paymentToken.transfer(msg.sender, amount);
+    }
+
+    /// @notice Burns `amount` tokens and give the equivalent ETH back to user
+    function returnTokens(uint256 amount) external {
+        paymentToken.burnFrom(msg.sender, amount);
+        payable(msg.sender).transfer(amount / purchaseRatio);
     }
 
 }
