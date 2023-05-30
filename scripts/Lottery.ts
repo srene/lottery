@@ -1,6 +1,6 @@
 import * as readline from 'readline';
 import { ethers } from "hardhat";
-import { Lottery, LotteryToken, Lottery__factory } from "../typechain-types";
+import { Lottery, LotteryToken, LotteryToken__factory, Lottery__factory } from "../typechain-types";
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 
@@ -10,6 +10,7 @@ let accounts: SignerWithAddress[];
 
 const BET_PRICE = 1;
 const BET_FEE = 0.2;
+const TOKEN_RATIO = 1;
 
 async function main() {
   await initAccounts();
@@ -29,8 +30,13 @@ async function initAccounts() {
 
 async function initContracts() {
   const contractFactory = new Lottery__factory(accounts[0]);
-  contract = await contractFactory.deploy();
+  contract = await contractFactory.deploy("LotteryToken","LTO",TOKEN_RATIO,ethers.utils.parseEther(BET_PRICE.toFixed(10)),ethers.utils.parseEther(BET_FEE.toFixed(10)));
   await contract.deployed(); 
+  const tokenAddress = await contract.paymentToken();
+  const tokenFactory = new LotteryToken__factory();
+  token = tokenFactory.attach(tokenAddress).connect(accounts[0]);
+  console.log("Deployed lottery contract to address "+contract.address);
+  console.log("Deployed Token contract to address "+token.address);
 }
 
 
@@ -163,6 +169,13 @@ function menuOptions(rl: readline.Interface) {
 async function checkState() {
     const state = await contract.betsOpen();
     console.log(`The lottery is ${state ? "open":"closed"}\n`);
+    const currentBlock = await ethers.provider.getBlock("latest");
+    const currentBlockDate = new Date(currentBlock.timestamp * 1000);
+    console.log(`The last block was mined at ${currentBlockDate.toLocaleDateString()} : ${currentBlockDate.toLocaleTimeString()} \n`);
+    const closingTime = await contract.betsClosingTime();
+    const closingTimeDate = new Date(closingTime.toNumber() * 1000);
+    console.log(`Lottey should close at ${closingTimeDate.toLocaleDateString()} : ${closingTimeDate.toLocaleTimeString()} \n`);
+
 }
 
 async function openBets(duration: string) {
@@ -173,7 +186,12 @@ async function openBets(duration: string) {
 }
 
 async function displayBalance(index: string) {
-  // TODO
+  //const balanceBN = await ethers.provider.getBalance(accounts[Number(index)].address);
+  const balanceBN = await accounts[Number(index)].getBalance();
+  const balance  = ethers.utils.formatEther(balanceBN);
+  console.log(
+    `The account address ${accounts[Number(index)].address} has ${balance} ETH\n`
+  );
 }
 
 async function buyTokens(index: string, amount: string) {
@@ -181,7 +199,11 @@ async function buyTokens(index: string, amount: string) {
 }
 
 async function displayTokenBalance(index: string) {
-  // TODO
+  const balanceBN = await token.balanceOf(accounts[Number(index)].address);
+  const balance  = ethers.utils.formatEther(balanceBN);
+  console.log(
+    `The account address ${accounts[Number(index)].address} has ${balance} ETH\n`
+  );
 }
 
 async function bet(index: string, amount: string) {
