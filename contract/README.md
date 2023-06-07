@@ -44,7 +44,21 @@
 ---
 
 ## Weekend Project
+1. Finish those functions :
 
-* Build a frontend for the Lottery dApp
+```
+- [ ] closeLottery()
+
+- [ ] displayPrize(index: string)
+
+- [ ] claimPrize(index: string, amount: string)
+
+- [ ] displayOwnerPool()
+
+- [ ] withdrawTokens(amount: string)
+
+- [ ] burnTokens(index: string, amount: string)
+
+```
+2. Build a frontend for the Lottery dApp
   * Use any framework of your preference
-  

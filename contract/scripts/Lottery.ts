@@ -29,12 +29,28 @@ async function initAccounts() {
 
 
 async function initContracts() {
+
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY_SANGOKU ?? "");
+
+  const chainId = 80001; // This is the chainId for Mumbai Testnet
+
+  const provider = new ethers.providers.AlchemyProvider(chainId, process.env.ALCHEMY_API_KEY);
+
+  const signer = wallet.connect(provider)
+
+
+
   const contractFactory = new Lottery__factory(accounts[0]);
   contract = await contractFactory.deploy("LotteryToken","LTO",TOKEN_RATIO,ethers.utils.parseEther(BET_PRICE.toFixed(10)),ethers.utils.parseEther(BET_FEE.toFixed(10)));
   await contract.deployed(); 
+
+
+
   const tokenAddress = await contract.paymentToken();
   const tokenFactory = new LotteryToken__factory();
   token = tokenFactory.attach(tokenAddress).connect(accounts[0]);
+
+
   console.log("Deployed lottery contract to address "+contract.address);
   console.log("Deployed Token contract to address "+token.address);
 }
@@ -167,11 +183,14 @@ function menuOptions(rl: readline.Interface) {
 }
 
 async function checkState() {
+
     const state = await contract.betsOpen();
     console.log(`The lottery is ${state ? "open":"closed"}\n`);
     const currentBlock = await ethers.provider.getBlock("latest");
     const currentBlockDate = new Date(currentBlock.timestamp * 1000);
     console.log(`The last block was mined at ${currentBlockDate.toLocaleDateString()} : ${currentBlockDate.toLocaleTimeString()} \n`);
+    
+    
     const closingTime = await contract.betsClosingTime();
     const closingTimeDate = new Date(closingTime.toNumber() * 1000);
     console.log(`Lottey should close at ${closingTimeDate.toLocaleDateString()} : ${closingTimeDate.toLocaleTimeString()} \n`);
@@ -179,6 +198,7 @@ async function checkState() {
 }
 
 async function openBets(duration: string) {
+
   const currentBlock = await ethers.provider.getBlock("latest");
   const tx = await contract.openBets(currentBlock.timestamp + Number(duration));
   const receipt = await tx.wait();
@@ -195,7 +215,13 @@ async function displayBalance(index: string) {
 }
 
 async function buyTokens(index: string, amount: string) {
-  // TODO
+  const tx = await contract.connect(accounts[Number(index)]).purchaseTokens()
+  
+
+  console.log(
+    `The account address ${accounts[Number(index)].address} has ${amount} ETH\n`
+  );
+  
 }
 
 async function displayTokenBalance(index: string) {
