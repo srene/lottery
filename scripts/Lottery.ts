@@ -196,8 +196,7 @@ async function displayBalance(index: string) {
 
 async function buyTokens(index: string, amount: string) {
   // TODO
-  await contract.connect(accounts[Number(index)]
-  ).purchaseTokens({ value: ethers.utils.parseUnits(amount) });
+  await contract.connect(accounts[Number(index)]).purchaseTokens({ value: ethers.utils.parseUnits(amount) });
 
 
 }
@@ -211,32 +210,64 @@ async function displayTokenBalance(index: string) {
 }
 
 async function bet(index: string, amount: string) {
-  // TODO
+
+  const allowTx = await token
+    .connect(accounts[Number(index)])
+    .approve(contract.address, ethers.constants.MaxUint256);
+  await allowTx.wait();
+  const tx = await contract.connect(accounts[Number(index)]).betMany(amount);
+  const receipt = await tx.wait();
+  console.log(`Bets placed (${receipt.transactionHash})\n`);
 }
 
 async function closeLottery() {
-  // TODO
+  const tx = await contract.closeLottery();
+  const receipt = await tx.wait();
+  console.log(`Bets closed (${receipt.transactionHash})\n`);
 }
 
 async function displayPrize(index: string) {
-  // TODO
-  return "TODO";
+  const prizeBN = await contract.prize(accounts[Number(index)].address);
+  const prize = ethers.utils.formatEther(prizeBN);
+  console.log(
+    `The account of address ${
+      accounts[Number(index)].address
+    } has earned a prize of ${prize} Tokens\n`
+  );
+  return prize;
 }
 
 async function claimPrize(index: string, amount: string) {
-  // TODO
+  const tx = await contract
+    .connect(accounts[Number(index)])
+    .prizeWithdraw(ethers.utils.parseEther(amount));
+  const receipt = await tx.wait();
+  console.log(`Prize claimed (${receipt.transactionHash})\n`);
 }
 
 async function displayOwnerPool() {
-  // TODO
+  const balanceBN = await contract.ownerPool();
+  const balance = ethers.utils.formatEther(balanceBN);
+  console.log(`The owner pool has (${balance}) Tokens \n`);
 }
 
 async function withdrawTokens(amount: string) {
-  // TODO
+  const tx = await contract.ownerWithdraw(ethers.utils.parseEther(amount));
+  const receipt = await tx.wait();
+  console.log(`Withdraw confirmed (${receipt.transactionHash})\n`);
 }
 
 async function burnTokens(index: string, amount: string) {
-  // TODO
+  const allowTx = await token
+    .connect(accounts[Number(index)])
+    .approve(contract.address, ethers.constants.MaxUint256);
+  const receiptAllow = await allowTx.wait();
+  console.log(`Allowance confirmed (${receiptAllow.transactionHash})\n`);
+  const tx = await contract
+    .connect(accounts[Number(index)])
+    .returnTokens(ethers.utils.parseEther(amount));
+  const receipt = await tx.wait();
+  console.log(`Burn confirmed (${receipt.transactionHash})\n`);
 }
 
 main().catch((error) => {
