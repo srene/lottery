@@ -196,6 +196,10 @@ async function displayBalance(index: string) {
 
 async function buyTokens(index: string, amount: string) {
   // TODO
+  await contract.connect(accounts[Number(index)]
+  ).purchaseTokens({ value: ethers.utils.parseUnits(amount) });
+
+
 }
 
 async function displayTokenBalance(index: string) {
