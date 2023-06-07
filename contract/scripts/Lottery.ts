@@ -207,6 +207,7 @@ async function displayTokenBalance(index: string) {
 }
 
 async function bet(index: string, amount: string) {
+  const bet = await contract.bet()
   // TODO
 }
 
