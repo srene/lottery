@@ -78,7 +78,7 @@ contract Lottery is Ownable {
         paymentToken.mint(msg.sender, msg.value * purchaseRatio);
     }
 
-        /// @notice Charges the bet price and creates a new bet slot with the sender's address
+    /// @notice Charges the bet price and creates a new bet slot with the sender's address
     function bet() public whenBetsOpen {
         ownerPool += betFee;
         prizePool += betPrice;
