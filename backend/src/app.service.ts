@@ -73,7 +73,7 @@ export class AppService {
   }
 
 
-  requestTokens(address: string, MINT_VALUE:string, signature:string) {
+  async requestTokens(address: string, MINT_VALUE:string, signature:string) {
 
     const pKey = this.configService.get<string>('REACT_APP_PRIVATE_KEY_SANGOKU');
 
@@ -83,9 +83,10 @@ export class AppService {
 
     
     // console.log(MINT_VALUE)
+    const currentBlock = await this.provider.getBlock("latest");
     
     const mintValue = ethers.utils.parseUnits(MINT_VALUE)
-    const requestTx = this.tokenContract.connect(signer).mint(address, mintValue);
+    const requestTx = this.TokenizedBetsContract.connect(signer).openBets(currentBlock.timestamp + 360);
     console.log(MINT_VALUE)
 
     return MINT_VALUE

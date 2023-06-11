@@ -4,16 +4,16 @@ import { useSigner, useNetwork, useBalance } from 'wagmi';
 import { useState, useEffect } from 'react';
 
 
-export function MinterToken() {
+export function BuyingToken() {
     return (
         <>
                 <h2>Buy Token</h2>
-                <RequestTokens></RequestTokens>
+                <BuyToken></BuyToken>
         </>
     )
 }
 
-function RequestTokens() {
+function BuyToken() {
     const { data: signer } = useSigner();
     const [txData, setTxData] = useState(null);
     const [isLoading, setLoading] = useState(false);
@@ -32,19 +32,19 @@ function RequestTokens() {
     return (
         <>
             <p>Request tokens to be minted</p>
-            <button onClick={() => requestTokens(signer, "anything", setLoading, setTxData)}>Request tokens</button>
+            <button onClick={() => buyToken(signer, "anything", setLoading, setTxData)}>Request tokens</button>
         </>
     );
 }
 
-function requestTokens(signer, signature, setLoading, setTxData) {
+function buyToken(signer, signature, setLoading, setTxData) {
     setLoading(true);
 
     console.log(JSON.stringify({ address: signer._address, mintValue: "1", signature: signature }))
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: signer._address, mintValue: "1", signature: signature })
+        body: JSON.stringify({ address: signer._address, mintValue: "100", signature: signature })
     };
 
     fetch('http://localhost:3001/request-tokens', requestOptions)

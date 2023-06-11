@@ -16,10 +16,6 @@ export function CheckState() {
     // const chainId2 = 11155111
 
 
-    // const provider = new ethers.providers.InfuraProvider(
-    //     chainId2, 
-    //     process.env.INFURA_API_KEY);
-
     const provider = new ethers.providers.AlchemyProvider(
         chainId1, 
         process.env.ALCHEMY_API_KEY);
@@ -54,3 +50,20 @@ export function CheckState() {
 
 }
 
+async function checkState(
+    contract, 
+    provider, 
+    setLoading, 
+    setData
+) {
+  setLoading(true)
+  const state = await contract.betsOpen();
+  console.log(`The lottery is ${state ? "open" : "closed"}\n`);
+  const currentBlock = await provider.getBlock("latest");
+  const currentBlockDate = new Date(currentBlock.timestamp * 1000);
+  console.log(`The last block was mined at ${currentBlockDate.toLocaleDateString()} : ${currentBlockDate.toLocaleTimeString()} \n`);
+  const closingTime = await contract.betsClosingTime();
+  const closingTimeDate = new Date(closingTime.toNumber() * 1000);
+  console.log(`Lottey should close at ${closingTimeDate.toLocaleDateString()} : ${closingTimeDate.toLocaleTimeString()} \n`);
+  setLoading(false)
+}
