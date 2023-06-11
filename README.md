@@ -47,18 +47,23 @@
 1. Finish those functions :
 
 ```
-- [ ] closeLottery()
+- [x] closeLottery()
 
-- [ ] displayPrize(index: string)
+- [x] displayPrize(index: string)
 
-- [ ] claimPrize(index: string, amount: string)
+- [x] claimPrize(index: string, amount: string)
 
-- [ ] displayOwnerPool()
+- [x] displayOwnerPool()
 
-- [ ] withdrawTokens(amount: string)
+- [x] withdrawTokens(amount: string)
 
-- [ ] burnTokens(index: string, amount: string)
+- [x] burnTokens(index: string, amount: string)
 
 ```
 2. Build a frontend for the Lottery dApp
   * Use any framework of your preference
+- I will use create-web3-react tools
+
+
+## Ressource 
+https://www.researchgate.net/publication/338064306_ABCDE_--_Agile_Block_Chain_Dapp_Engineering

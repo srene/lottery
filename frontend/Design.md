@@ -1,0 +1,12 @@
+- remplacer les input promt par des myens de cliquer chaque élément pour les actions
+    - [2]: Open bets 
+    - [0]: Exit 
+    - [3]: Top up account tokens 
+    - [4]: Bet with account 
+    - [8]: Burn tokens 
+    - [5]: Close bets 
+    - [7]: Withdraw 
+
+- quelque chose qui met à jour les états:
+    - [6]: Check player prize 
+    - [1]: Check state 
